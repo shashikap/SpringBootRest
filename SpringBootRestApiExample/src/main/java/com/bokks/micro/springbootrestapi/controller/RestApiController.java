@@ -2,7 +2,9 @@ package com.bokks.micro.springbootrestapi.controller;
 
 import java.util.List;
 
+import com.bokks.micro.springbootrestapi.filters.Secured;
 import com.bokks.micro.springbootrestapi.model.User;
+import com.bokks.micro.springbootrestapi.model.UserRoles;
 import com.bokks.micro.springbootrestapi.service.UserService;
 import com.bokks.micro.springbootrestapi.util.CustomErrorType;
 import org.slf4j.Logger;
@@ -25,7 +27,9 @@ public class RestApiController {
 
 	// -------------------Retrieve All Users---------------------------------------------
 
-	@RequestMapping(value = "/version/", method = RequestMethod.GET)
+//	@Secured({UserRoles.ADMIN})
+	@Secured
+	@RequestMapping(value = "/version", method = RequestMethod.GET)
 	public String getVersion() {
 	return "SpringBootRestAPI Verion 1.0";
 	}
