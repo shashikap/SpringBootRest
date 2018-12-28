@@ -7,7 +7,7 @@ import com.bokks.micro.springbootrestapi.model.User;
 
 public interface UserService {
 	
-	User findById(long id);
+	User findByUsername(String username);
 	
 	User findByName(String name);
 	
@@ -15,7 +15,7 @@ public interface UserService {
 	
 	void updateUser(User user);
 	
-	void deleteUserById(long id);
+	void deleteUserByUsername(String username);
 
 	List<User> findAllUsers();
 	

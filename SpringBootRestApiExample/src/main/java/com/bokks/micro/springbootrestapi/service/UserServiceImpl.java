@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.bokks.micro.springbootrestapi.model.User;
+import com.bokks.micro.springbootrestapi.model.UserRoles;
 import org.springframework.stereotype.Service;
 
 
@@ -24,9 +25,9 @@ public class UserServiceImpl implements UserService{
 		return users;
 	}
 	
-	public User findById(long id) {
+	public User findByUsername(String username) {
 		for(User user : users){
-			if(user.getId() == id){
+			if(user.getUsername().equals(username)){
 				return user;
 			}
 		}
@@ -43,7 +44,6 @@ public class UserServiceImpl implements UserService{
 	}
 	
 	public void saveUser(User user) {
-		user.setId(counter.incrementAndGet());
 		users.add(user);
 	}
 
@@ -52,11 +52,11 @@ public class UserServiceImpl implements UserService{
 		users.set(index, user);
 	}
 
-	public void deleteUserById(long id) {
+	public void deleteUserByUsername(String username) {
 		
 		for (Iterator<User> iterator = users.iterator(); iterator.hasNext(); ) {
 		    User user = iterator.next();
-		    if (user.getId() == id) {
+		    if (user.getUsername() == username) {
 		        iterator.remove();
 		    }
 		}
@@ -72,10 +72,10 @@ public class UserServiceImpl implements UserService{
 
 	private static List<User> populateDummyUsers(){
 		List<User> users = new ArrayList<User>();
-		users.add(new User(counter.incrementAndGet(),"Sam",30, 70000));
-		users.add(new User(counter.incrementAndGet(),"Tom",40, 50000));
-		users.add(new User(counter.incrementAndGet(),"Jerome",45, 30000));
-		users.add(new User(counter.incrementAndGet(),"Silvia",50, 40000));
+		users.add(new User("admin","Sam",30, 70000,"admin123", UserRoles.ADMIN));
+		users.add(new User("user1","Tom",40, 50000,"admin123", UserRoles.ROLE1));
+		users.add(new User("user2","Jerome",45, 30000,"admin123", UserRoles.ROLE2));
+		users.add(new User("user3","Silvia",50, 40000,"admin123", UserRoles.ROLE3));
 		return users;
 	}
 

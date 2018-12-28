@@ -1,8 +1,8 @@
 package com.bokks.micro.springbootrestapi.model;
-	
+
 public class User {
 
-	private long id;
+	private String username;
 	
 	private String name;
 	
@@ -10,23 +10,29 @@ public class User {
 	
 	private double salary;
 
+	private String password;
+
+	private UserRoles userRole;
+
 	public User(){
-		id=0;
+		username ="";
 	}
 	
-	public User(long id, String name, int age, double salary){
-		this.id = id;
+	public User(String username, String name, int age, double salary, String password, UserRoles role ){
+		this.username = username;
 		this.name = name;
 		this.age = age;
 		this.salary = salary;
+		this.password = password;
+		this.userRole = role;
 	}
 	
-	public long getId() {
-		return id;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setId(long id) {
-		this.id = id;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	public String getName() {
@@ -53,13 +59,29 @@ public class User {
 		this.salary = salary;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (int) (id ^ (id >>> 32));
-		return result;
+	public String getPassword() {
+		return password;
 	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public UserRoles getUserRole() {
+		return userRole;
+	}
+
+	public void setUserRole(UserRoles userRole) {
+		this.userRole = userRole;
+	}
+
+//	@Override
+//	public int hashCode() {
+//		final int prime = 31;
+//		int result = 1;
+//		result = prime * result + (int) (username ^ (username >>> 32));
+//		return result;
+//	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -70,14 +92,14 @@ public class User {
 		if (getClass() != obj.getClass())
 			return false;
 		User other = (User) obj;
-		if (id != other.id)
+		if (username != other.username)
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", name=" + name + ", age=" + age
+		return "User [username=" + username + ", name=" + name + ", age=" + age
 				+ ", salary=" + salary + "]";
 	}
 
