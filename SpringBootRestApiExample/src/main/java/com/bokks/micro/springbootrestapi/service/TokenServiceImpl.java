@@ -23,7 +23,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public boolean isTokenValid(String tokenString) {
         for(Token token : tokens){
-            if(token.getToken() == this.getTokenUUID(tokenString)){
+            if(token.getToken().equals(this.getTokenUUID(tokenString))){
                 return true;
             }
         }
@@ -34,7 +34,7 @@ public class TokenServiceImpl implements TokenService {
 
     public Token findByToken(String tokenString) {
         for(Token token : tokens){
-            if(token.getToken() == this.getTokenUUID(tokenString)){
+            if(token.getToken().equals(this.getTokenUUID(tokenString))){
                 return token;
             }
         }
@@ -60,7 +60,7 @@ public class TokenServiceImpl implements TokenService {
     private String getTokenUUID(String tokenForUUID){
         byte[] decodedBytes = Base64.decodeBase64(tokenForUUID.getBytes());
         String tokenStringAfterDecode = new String(decodedBytes);
-        String[] tokenArray = tokenStringAfterDecode.split("|");
+        String[] tokenArray = tokenStringAfterDecode.split("##");
 
         return tokenArray[1];
 

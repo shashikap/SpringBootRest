@@ -1,62 +1,34 @@
 package com.bokks.micro.springbootrestapi.filters;
 
-import org.glassfish.jersey.internal.util.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.bokks.micro.springbootrestapi.model.UserRoles;
+import com.bokks.micro.springbootrestapi.service.TokenService;
+import com.bokks.micro.springbootrestapi.service.UserService;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Priority;
-import javax.annotation.Priority;
-import javax.servlet.*;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
-import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.StringTokenizer;
 
-@Secured
-@Provider
-@Priority(1)
+@Aspect
 @Component
-public class AuthenticationFilter implements Filter {
+public final class AuthenticationFilter {
+
 
     private static final String REALM = "example";
     private static final String AUTHENTICATION_SCHEME = "Bearer";
-
-//    @Override
-//    public void filter(ContainerRequestContext requestContext) throws IOException {
-//
-//        // Get the Authorization header from the request
-//        String authorizationHeader =
-//                requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
-//
-//        // Validate the Authorization header
-//        if (!isTokenBasedAuthentication(authorizationHeader)) {
-//            abortWithUnauthorized(requestContext);
-//            return;
-//        }
-//
-//        // Extract the token from the Authorization header
-//        String token = authorizationHeader
-//                .substring(AUTHENTICATION_SCHEME.length()).trim();
-//
-//        try {
-//
-//            // Validate the token
-//            validateToken(token);
-//
-//        } catch (Exception e) {
-//            abortWithUnauthorized(requestContext);
-//        }
-//    }
+    @Autowired
+    HttpServletRequest request;
+    @Autowired
+    TokenService tokenService;
+    @Autowired
+    UserService userService;
 
     private boolean isTokenBasedAuthentication(String authorizationHeader) {
 
@@ -67,57 +39,68 @@ public class AuthenticationFilter implements Filter {
                 .startsWith(AUTHENTICATION_SCHEME.toLowerCase() + " ");
     }
 
-    private void abortWithUnauthorized(ContainerRequestContext requestContext) {
+    private boolean isValidToken(String token) {
 
-        // Abort the filter chain with a 401 status code response
-        // The WWW-Authenticate header is sent along with the response
-        requestContext.abortWith(
-                Response.status(Response.Status.UNAUTHORIZED)
-                        .header(HttpHeaders.WWW_AUTHENTICATE,
-                                AUTHENTICATION_SCHEME + " realm=\"" + REALM + "\"")
-                        .build());
+        // Check if the Authorization header is valid
+        // It must not be null and must be prefixed with "Bearer" plus a whitespace
+        // The authentication scheme comparison must be case-insensitive
+        return tokenService.isTokenValid(token);
     }
 
-    private void validateToken(String token) throws Exception {
-        // Check if the token was issued by the server and if it's not expired
-        // Throw an Exception if the token is invalid
-    }
 
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-
-    }
-
-    @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-
-                // Get the Authorization header from the request
-        String authorizationHeader ="";
-               // servletRequest.getgetHeaderString(HttpHeaders.AUTHORIZATION);
-
-        // Validate the Authorization header
-        if (!isTokenBasedAuthentication(authorizationHeader)) {
-            //abortWithUnauthorized(requestContext);
-            return;
-        }
-
-        // Extract the token from the Authorization header
-        String token = authorizationHeader
-                .substring(AUTHENTICATION_SCHEME.length()).trim();
+    @Around(" @annotation(com.bokks.micro.springbootrestapi.filters.Secured)")
+    public Object validateAspect(ProceedingJoinPoint pjp) throws Throwable {
 
         try {
+            MethodSignature signature = (MethodSignature) pjp.getSignature();
+            Method method = signature.getMethod();
+            boolean authorizedrequest = false;
 
-            // Validate the token
-            validateToken(token);
+            Secured authorizedByType = method.getAnnotation(Secured.class);
+            UserRoles[] rolesOfTheAPI = authorizedByType.authorizedBy();
 
-        } catch (Exception e) {
-            //abortWithUnauthorized(requestContext);
+
+            String authorizationHeaderString = request.getHeader(HttpHeaders.AUTHORIZATION);
+            String authorizationTokenWithoutAuthScehma = authorizationHeaderString.substring(AUTHENTICATION_SCHEME.length()).trim();
+
+            if (!isTokenBasedAuthentication(authorizationHeaderString)) {
+                return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            }
+            if (!isValidToken(authorizationTokenWithoutAuthScehma)) {
+                return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            }
+
+            Enum userRole = getUserRolerFromToken(authorizationTokenWithoutAuthScehma);
+
+            System.out.println("############################################ Filter was called ############################################");
+            System.out.println("############################################ Value Of the annotation " + rolesOfTheAPI.toString() + " ############################################");
+
+            // Call your Authorization server and check if all is good
+
+            for (Enum rolesAllowed : rolesOfTheAPI) {
+                if (rolesAllowed.equals(userRole)) {
+                    authorizedrequest = true;
+                }
+            }
+
+            if (authorizedrequest) {
+                return pjp.proceed();
+            }
+
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }catch (Exception e){
+
+            return new ResponseEntity(e.getMessage(),HttpStatus.UNAUTHORIZED);
         }
+
     }
 
-    @Override
-    public void destroy() {
+    private UserRoles getUserRolerFromToken(String token) {
 
+        String userName = tokenService.findByToken(token).getUsername();
+        UserRoles userRoles = userService.findByUsername(userName).getUserRole();
+
+        return userRoles;
     }
 }
 

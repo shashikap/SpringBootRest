@@ -1,0 +1,4 @@
+FROM java:8
+EXPOSE 9001
+ADD /target/SpringBootRestApiExample-1.0-SNAPSHOT.jar SpringBootRestApiExample-1.0-SNAPSHOT.jar
+ENTRYPOINT ["java","-jar","SpringBootRestApiExample-1.0-SNAPSHOT.jar"]

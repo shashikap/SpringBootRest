@@ -42,7 +42,7 @@ public class Token {
 
     @Override
     public String toString() {
-        String encodedToken = timestamp + "|" + token+ "|" + username;
+        String encodedToken = timestamp + "##" + token+ "##" + username;
         byte[] encodedBytes = Base64.encodeBase64(encodedToken.getBytes());
 
         return new String(encodedBytes);
