@@ -26,31 +26,22 @@ public class RestApiController {
 
     @Autowired
     UserService userService; //Service which will do all data retrieval/manipulation work
-    @Autowired
-    AuthenticationFilter authenticationFilter; //Service which will do all data retrieval/manipulation work
 
     // -------------------Retrieve All Users---------------------------------------------
 
-    @Secured(authorizedBy = UserRoles.ADMIN)
+    @Secured(authorizedBy = {UserRoles.ADMIN,UserRoles.ROLE1}) // Annotation will allow Role based authorization fot the APIs
     @RequestMapping(value = "/version", method = RequestMethod.GET)
     public ResponseEntity<String> getVersion() {
-
-        System.out.println("############################################ API was called ############################################");
+        logger.info("API version details : SpringBootRestAPI Verion 1.0");
         return new ResponseEntity<String>("SpringBootRestAPI Verion 1.0", HttpStatus.OK);
     }
 
-    @Secured(authorizedBy = UserRoles.ROLE1)
-    @RequestMapping(value = "/version1", method = RequestMethod.GET)
-    public ResponseEntity<String> getVersion1() {
-
-        System.out.println("############################################ API was called ############################################");
-        return new ResponseEntity<String>("SpringBootRestAPI Verion 1.0", HttpStatus.OK);
-    }
-
+    @Secured(authorizedBy = UserRoles.ADMIN)
     @RequestMapping(value = "/user/", method = RequestMethod.GET)
     public ResponseEntity<List<User>> listAllUsers() {
         List<User> users = userService.findAllUsers();
         if (users.isEmpty()) {
+            logger.info("No Users found");
             return new ResponseEntity(HttpStatus.NO_CONTENT);
             // You many decide to return HttpStatus.NOT_FOUND
         }

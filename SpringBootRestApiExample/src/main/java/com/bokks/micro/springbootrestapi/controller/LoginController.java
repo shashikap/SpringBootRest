@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/authenticate")
 public class LoginController {
 
-    public static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
+    public static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @Autowired
     UserService userService; //Service which will do all data retrieval/manipulation work
@@ -83,6 +83,7 @@ public class LoginController {
         // Issue a token (can be a random String persisted to a database or a JWT token)
         // The issued token must be associated to a user
         // Return the issued token
+        logger.info("Creating Token for username {}", username);
         return  tokenService.createToken(username);
 
     }

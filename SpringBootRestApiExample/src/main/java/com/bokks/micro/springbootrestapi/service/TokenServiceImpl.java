@@ -20,6 +20,11 @@ public class TokenServiceImpl implements TokenService {
 
     }
 
+    /**
+     * Check the token is in the system
+     * @param tokenString
+     * @return based on availability return boolena value
+     */
     @Override
     public boolean isTokenValid(String tokenString) {
         for(Token token : tokens){
@@ -32,6 +37,12 @@ public class TokenServiceImpl implements TokenService {
     }
 
 
+    /***
+     * Find the token using token string send in the request
+     * find the token using unique UUID
+     * @param tokenString
+     * @return the Token object
+     */
     public Token findByToken(String tokenString) {
         for(Token token : tokens){
             if(token.getToken().equals(this.getTokenUUID(tokenString))){
@@ -41,8 +52,14 @@ public class TokenServiceImpl implements TokenService {
         return null;
     }
 
+    /**
+     * Generate token based on the timestamp random UUID and username
+     * @param username
+     * @return decoded Token string format will be timestamp##UUID##username
+     */
     @Override
     public String createToken(String username) {
+        // Token unqiuely identified using UUID else can use the decoded token string as Unique identifier
         Date date= new Date();
         long time = date.getTime();
         String tokenString = UUID.randomUUID().toString();
@@ -52,11 +69,12 @@ public class TokenServiceImpl implements TokenService {
         return newToken.toString();
     }
 
-    public void updateToken(String token) {
-//        int index = tokens.indexOf(token);
-//        tokens.set(index, token);
-    }
 
+    /**
+     * Split the string and get the token UUID in the token send in the request
+     * @param tokenForUUID
+     * @return UUID String
+     */
     private String getTokenUUID(String tokenForUUID){
         byte[] decodedBytes = Base64.decodeBase64(tokenForUUID.getBytes());
         String tokenStringAfterDecode = new String(decodedBytes);
